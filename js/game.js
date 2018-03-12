@@ -2,6 +2,8 @@ class Game {
   constructor() {
     this.buildWorld();
     this.buildView();
+    this.world.viewPortSize = this.view.size;
+    this.input = new Input(this.view, this.world);
   }
 
   buildWorld() {
@@ -11,6 +13,14 @@ class Game {
   buildView() {
     this.view = new View(360, this.world);
     document.body.append(this.view.getCanvas());
+  }
+
+  requestFullScreen() {
+    if(this.view.getCanvas().webkitRequestFullScreen) {
+      this.view.getCanvas().webkitRequestFullScreen();
+    } else {
+      this.view.getCanvas().mozRequestFullScreen();
+    }
   }
 
   loop(rt) {

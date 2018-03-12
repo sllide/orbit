@@ -1,10 +1,12 @@
 class Body {
-  constructor(x,y,mass,color=false) {
+  constructor(x,y,mass,color=false,parent=false) {
     this.pos = new Vector(x,y);
     this.vel = new Vector();
     this.mass = mass;
     this.lock = false;
     this.color = color;
+    this.lifetime = 0;
+    this.parent = parent;
     if(!color) {
       this.color = "#" + Math.randCol();
     }
@@ -15,6 +17,7 @@ class Body {
   }
 
   step() {
+    this.lifetime++;
     this.pos.add(this.vel);
   }
 

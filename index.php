@@ -8,6 +8,7 @@
     ?>
   </head>
   <body>
+    <a href='#' onclick="game.requestFullScreen()">Fullscreen</a>
     <script>
       var game = new Game();
       game.loop();

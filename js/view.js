@@ -25,9 +25,11 @@ class View {
   drawWorld(ctx) {
     this.drawParticles(ctx);
     this.drawBodies(ctx);
+    this.drawPath(ctx);
   }
 
   drawBodies(ctx) {
+    ctx.globalAlpha = 1;
     for (let b of this.world.bodies) {
       let x = b.pos.x + this.size.x/2;
       let y = b.pos.y + this.size.y/2;
@@ -43,9 +45,25 @@ class View {
       let x = p.pos.x + this.size.x/2;
       let y = p.pos.y + this.size.y/2;
       ctx.fillStyle = p.color;
+      ctx.globalAlpha = (255-p.lifetime)/255;
       ctx.beginPath();
       ctx.arc(x,y,p.mass,0,2*Math.PI);
       ctx.fill();
+    }
+  }
+
+  drawPath(ctx) {
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 2;
+    ctx.globalAlpha = 1;
+    if(this.world.path) {
+      ctx.beginPath();
+      for(let p of this.world.path) {
+        let x = p[0] + this.size.x/2;
+        let y = p[1] + this.size.y/2;
+        ctx.lineTo(x,y);
+      }
+      ctx.stroke();
     }
   }
 
