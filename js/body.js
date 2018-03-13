@@ -1,8 +1,9 @@
 class Body {
-  constructor(x,y,mass,color=false,parent=false) {
+  constructor(x,y,mass,radius,color=false,parent=false) {
     this.pos = new Vector(x,y);
     this.vel = new Vector();
     this.mass = mass;
+    this.radius = radius;
     this.lock = false;
     this.color = color;
     this.lifetime = 0;

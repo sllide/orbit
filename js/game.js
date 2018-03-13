@@ -15,14 +15,6 @@ class Game {
     document.body.append(this.view.getCanvas());
   }
 
-  requestFullScreen() {
-    if(this.view.getCanvas().webkitRequestFullScreen) {
-      this.view.getCanvas().webkitRequestFullScreen();
-    } else {
-      this.view.getCanvas().mozRequestFullScreen();
-    }
-  }
-
   loop(rt) {
     this.world.step();
     this.view.draw();

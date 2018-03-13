@@ -5,26 +5,39 @@ class World {
     this.bodies = Array();
     this.particles = Array();
     this.createCenter();
+    this.level = 1;
+    this.counter = 0;
+    this.gameover = false;
+    this.gmcounter = 0;
   }
 
   createCenter() {
-    let body = new Body(0,0,30);
+    let body = new Body(0,0,30000000,30);
     body.anchor();
+    this.sun = body;
     this.bodies.push(body);
   }
 
   fire(sx,sy,ex,ey) {
-    let body = new Body(sx-this.viewPortSize.x/2,sy-this.viewPortSize.y/2,10);
+    if(this.bodies.length-1 >= this.level || this.gameover) return;
+    let body = new Body(sx-this.viewPortSize.x/2,sy-this.viewPortSize.y/2,1000,10);
     body.addAcceleration(-(ex-sx)/50,-(ey-sy)/50);
     this.bodies.push(body);
   }
 
   step(rt) {
+    if(this.gameover && this.gmcounter++/60>3) return;
     this.updateBodyAcceleration();
     this.updateBodyPosition();
     this.checkBodyCollision();
     this.updateParticles();
-    this.calculatePath();
+    if(this.bodies.length-1 >= this.level) {
+      this.counter += 1;
+      if(this.counter/60>10) {
+        this.level++;
+        this.counter = 0;
+      }
+    }
   }
 
   updateBodyAcceleration() {
@@ -34,7 +47,7 @@ class World {
           if(b !== tb) {
             let dist = b.pos.length(tb.pos);
             let rot = Math.atan2(tb.pos.x - b.pos.x, tb.pos.y - b.pos.y);
-            let att = G * (((b.mass*10000) * (tb.mass*10000))/dist);
+            let att = G * (((b.mass) * (tb.mass))/dist);
             b.addAcceleration(Math.sin(rot)*att,Math.cos(rot)*att);
           }
         }
@@ -46,7 +59,7 @@ class World {
     for (let b of this.bodies) {
       if(!b.lock) {
         b.step();
-        let p = new Body(b.pos.x,b.pos.y,3,b.color,b);
+        let p = new Body(b.pos.x,b.pos.y,500,3,b.color,b);
         p.addAcceleration(b.vel.x,b.vel.y);
         this.particles.push(p);
       }
@@ -64,7 +77,7 @@ class World {
       y = b.pos.y + Math.random()*10-5;
       xVel = b.vel.x + Math.random()/2;
       yVel = b.vel.y + Math.random()/2;
-      p = new Body(x,y,3,b.color,b);
+      p = new Body(x,y,100,3,b.color,b);
       p.addAcceleration(xVel,yVel);
       this.particles.push(p);
     }
@@ -78,7 +91,8 @@ class World {
         for (let tb of this.bodies) {
           if(b !== tb) {
             let dist = b.pos.length(tb.pos);
-            if(b.mass+tb.mass>dist) {
+            if(b.radius+tb.radius>dist) {
+              this.gameover = true;
               this.spawnExplosion(b);
               removal.push(b);
               if(!tb.lock) {
@@ -105,9 +119,10 @@ class World {
     for (let p of this.particles) {
       for (let b of this.bodies) {
           if(p.parent && b !== p.parent) {
+            let massMult = (b !== this.sun) ? 10000 : 0;
             let dist = p.pos.length(b.pos);
             let rot = Math.atan2(b.pos.x - p.pos.x, b.pos.y - p.pos.y);
-            let att = G * (((p.mass*10000) * (b.mass*10000))/dist);
+            let att = G * (((p.mass*massMult) * (b.mass))/dist);
             p.addAcceleration(Math.sin(rot)*att,Math.cos(rot)*att);
           }
       }
@@ -127,35 +142,5 @@ class World {
       index = this.particles.indexOf(r);
       this.particles.splice(index,1);
     }
-  }
-
-  setPath(sx,sy,ex,ey) {
-    this.sx = sx;
-    this.sy = sy;
-    this.ex = ex;
-    this.ey = ey;
-  }
-  
-  calculatePath() {
-    if(this.sx<0||this.sy<0) return;
-    let path = Array();
-    let b = new Body(this.sx-this.viewPortSize.x/2,this.sy-this.viewPortSize.y/2,10);
-    b.addAcceleration(-(this.ex-this.sx)/50,-(this.ey-this.sy)/50);
-    for(let i=0;i<500;i++) {
-      for(let tb of this.bodies) {
-        let dist = tb.pos.length(b.pos);
-        let rot = Math.atan2(tb.pos.x - b.pos.x, tb.pos.y - b.pos.y);
-        let att = G * (((b.mass*10000) * (tb.mass*10000))/dist);
-        b.addAcceleration(Math.sin(rot)*att,Math.cos(rot)*att);
-      }
-      b.step();
-      path.push([b.pos.x,b.pos.y]);
-    }
-    this.path = path;
-  }
-
-  getScore() {
-    if(!this.score) this.score = 0;
-    return this.score++;
   }
 }
